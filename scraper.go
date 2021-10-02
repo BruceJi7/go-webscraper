@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -14,7 +15,10 @@ func processHREF(index int, element *goquery.Selection) {
 	// See if the href attribute exists on the element
 	href, exists := element.Attr("href")
 	if exists {
-		fmt.Println(href)
+
+		if strings.HasPrefix(href, "http") {
+			fmt.Println("External link: ", href)
+		}
 	}
 }
 
