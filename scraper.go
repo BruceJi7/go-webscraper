@@ -2,12 +2,21 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"os"
 	"time"
+
+	"github.com/PuerkitoBio/goquery"
 )
+
+// This will get called for each HTML element found
+func processHREF(index int, element *goquery.Selection) {
+	// See if the href attribute exists on the element
+	href, exists := element.Attr("href")
+	if exists {
+		fmt.Println(href)
+	}
+}
 
 func main() {
 
@@ -36,21 +45,15 @@ func main() {
 	}
 	defer response.Body.Close()
 
-	outFile, err := os.Create("output.html")
+	// Create goquery document
+	document, err := goquery.NewDocumentFromReader(response.Body)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error loading HTTP response body ", err)
 	} else {
-		fmt.Println("File created")
-	}
-	defer outFile.Close()
-
-	// Copy data from the response to the file
-	n, err := io.Copy(outFile, response.Body)
-	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Loaded response body into goquery")
 	}
 
-	log.Println("Number of bytes copied to file:", n)
-
+	//Find all links and print them if they exist
+	document.Find("a").Each(processHREF)
 }
