@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 func main() {
 
-	var requestURL string = "https://www.devdungeon.com/"
+	var requestURL string = "https://www.devdungeon.com/archive"
 
 	//Setup client, use timeout
 	client := &http.Client{
@@ -26,18 +27,30 @@ func main() {
 	request.Header.Set("User-Agent", "TUTORIAL SCRAPER WHEEEE")
 
 	// Make HTTP GET request
+	fmt.Println("Beginning request")
 	response, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Println("Request completed successfully")
 	}
 	defer response.Body.Close()
 
-	// Copy data from the response to standard output
-	n, err := io.Copy(os.Stdout, response.Body)
+	outFile, err := os.Create("output.html")
+
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		fmt.Println("File created")
+	}
+	defer outFile.Close()
+
+	// Copy data from the response to the file
+	n, err := io.Copy(outFile, response.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	log.Println("Number of bytes copied to STDOUT:", n)
+	log.Println("Number of bytes copied to file:", n)
 
 }
