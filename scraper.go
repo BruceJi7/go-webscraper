@@ -10,13 +10,23 @@ import (
 
 func main() {
 
+	var requestURL string = "https://www.devdungeon.com/"
+
 	//Setup client, use timeout
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}
 
+	// Initialise HTTP request before sending it
+	request, err := http.NewRequest("GET", requestURL, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	request.Header.Set("User-Agent", "TUTORIAL SCRAPER WHEEEE")
+
 	// Make HTTP GET request
-	response, err := client.Get("https://www.devdungeon.com/")
+	response, err := client.Do(request)
 	if err != nil {
 		log.Fatal(err)
 	}
