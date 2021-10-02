@@ -1,63 +1,42 @@
+// parse_urls.go
 package main
 
 import (
 	"fmt"
 	"log"
-	"net/http"
-	"strings"
-	"time"
-
-	"github.com/PuerkitoBio/goquery"
+	"net/url"
 )
 
-// This will get called for each HTML element found
-func processHREF(index int, element *goquery.Selection) {
-	// See if the href attribute exists on the element
-	href, exists := element.Attr("href")
-	if exists {
-
-		if strings.HasPrefix(href, "http") {
-			fmt.Println("External link: ", href)
-		}
-	}
-}
-
 func main() {
-
-	var requestURL string = "https://www.devdungeon.com/archive"
-
-	//Setup client, use timeout
-	client := &http.Client{
-		Timeout: 30 * time.Second,
-	}
-
-	// Initialise HTTP request before sending it
-	request, err := http.NewRequest("GET", requestURL, nil)
+	// Parse a complex URL
+	complexUrl := "https://www.example.com/path/to/?query=123&this=that#fragment"
+	parsedUrl, err := url.Parse(complexUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	request.Header.Set("User-Agent", "TUTORIAL SCRAPER WHEEEE")
+	// Print out URL pieces
+	fmt.Println("Scheme: " + parsedUrl.Scheme)
+	fmt.Println("Host: " + parsedUrl.Host)
+	fmt.Println("Path: " + parsedUrl.Path)
+	fmt.Println("Query string: " + parsedUrl.RawQuery)
+	fmt.Println("Fragment: " + parsedUrl.Fragment)
 
-	// Make HTTP GET request
-	fmt.Println("Beginning request")
-	response, err := client.Do(request)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		fmt.Println("Request completed successfully")
-	}
-	defer response.Body.Close()
+	// Get the query key/values as a map
+	fmt.Println("\nQuery values:")
+	queryMap := parsedUrl.Query()
+	fmt.Println(queryMap)
 
-	// Create goquery document
-	document, err := goquery.NewDocumentFromReader(response.Body)
+	// Craft a new URL from scratch
+	var customURL url.URL
+	customURL.Scheme = "https"
+	customURL.Host = "google.com"
+	newQueryValues := customURL.Query()
+	newQueryValues.Set("key1", "value1")
+	newQueryValues.Set("key2", "value2")
+	customURL.Fragment = "bookmarkLink"
+	customURL.RawQuery = newQueryValues.Encode()
 
-	if err != nil {
-		log.Fatal("Error loading HTTP response body ", err)
-	} else {
-		fmt.Println("Loaded response body into goquery")
-	}
-
-	//Find all links and print them if they exist
-	document.Find("a").Each(processHREF)
+	fmt.Println("\nCustom URL:")
+	fmt.Println(customURL.String())
 }
